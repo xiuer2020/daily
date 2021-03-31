@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #base,
+        #calc {
+            border: 1px solid #000;
+        }
+
+        #base .cell,
+        #calc .cell {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+
+<body>
+    <table id="base">
+        <thead class="thead">
+            <tr class="tr">
+                <th class="cell"> 项目</th>
+                <th class="cell">每100g</th>
+                <th class="cell">NRV%</th>
+            </tr>
+        </thead>
+        <tbody class="tbody">
+            <tr class="tr" id="row0">
+                <td class="cell"><input type="text" class="item-name" value="能量" disabled></td>
+                <td class="cell"><input type="text" class="item-value"></td>
+                <td class="cell"><input type="text" class="item-refe-value"></td>
+            </tr>
+            <tr class="tr" id="row1">
+                <td class="cell"><input type="text" class="item-name" value="蛋白质" disabled></td>
+                <td class="cell"><input type="text" class="item-value"></td>
+                <td class="cell"><input type="text" class="item-refe-value"></td>
+            </tr>
+            <tr class="tr" id="row2">
+                <td class="cell"><input type="text" class="item-name" value="脂肪" disabled></td>
+                <td class="cell"><input type="text" class="item-value"></td>
+                <td class="cell"><input type="text" class="item-refe-value"></td>
+            </tr>
+            <tr class="tr" id="row3">
+                <td class="cell"><input type="text" class="item-name" value="‘碳水化合物" disabled></td>
+                <td class="cell"><input type="text" class="item-value"></td>
+                <td class="cell"><input type="text" class="item-refe-value"></td>
+            </tr>
+
+        </tbody>
+    </table>
+    <ul class="commit">
+        <li title="输入小数或者整数">缩放倍数<input type="text" id="zoom" value="0.0033" /></li>
+        <li id="confirm">确认</li>
+    </ul>
+    <!-- Zoom multiple缩放倍数 -->
+
+    <!-- proportion比例 referenceResources参考-->
+    <table id="calc">
+        <thead class="thead">
+            <tr class="tr">
+                <th colspan="3" class="cell">生成的表</th>
+            </tr>
+            <tr class="tr">
+                <th class="cell">项目</th>
+                <th class="cell">每<span id="unit">0.333</span>g</th>
+                <th class="cell">NRV%</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="tr" id="row0-calc">
+                <td class="cell"><input type="text" class="item-name" value="能量" disabled></td>
+                <td class="cell"><input type="text" class="item-value"></td>
+                <td class="cell"><input type="text" class="item-refe-value"></td>
+            </tr>
+            <tr class="tr" id="row1-calc">
+                <td class="cell"><input type="text" class="item-name" value="蛋白质" disabled></td>
+                <td class="cell"><input type="text" class="item-value"></td>
+                <td class="cell"><input type="text" class="item-refe-value"></td>
+            </tr>
+            <tr class="tr" id="row2-calc">
+                <td class="cell"><input type="text" class="item-name" value="脂肪" disabled></td>
+                <td class="cell"><input type="text" class="item-value"></td>
+                <td class="cell"><input type="text" class="item-refe-value"></td>
+            </tr>
+            <tr class="tr" id="row3-calc">
+                <td class="cell"><input type="text" class="item-name" value="‘碳水化合物" disabled></td>
+                <td class="cell"><input type="text" class="item-value"></td>
+                <td class="cell"><input type="text" class="item-refe-value"></td>
+            </tr>
+        </tbody>
+    </table>
+    <!-- calc: calculation计算 -->
+
+</body>
+<script src="https://cdn.staticfile.org/jquery/2.2.4/jquery.js"></script>
+<script>
+    // console.log($);
+    // console.log($('#row1 .item-name'));
+
+    const calc = function (e) {
+        if (e.key === "Enter" || e.keyCode === 13 || e.button === 0 || e.buttons === 0) {
+            console.log(e);
+            let myFoods = localStorage.getItem('myFoods')
+            if (myFoods) {
+                myFoods = JSON.parse(myFoods)
+            } else {
+                myFoods = []
+            }
+
+            let rows = [1, 2, 3, 4]
+            const zoom = Number($('#zoom').val());
+            // console.log(Number(zoom), Number(row1ItemValue));
+            let food = {
+                old: {},
+                new: {}
+            }
+            for (let i = 0; i < rows.length; i++) {
+                let rowItemName = `row${i}ItemName`;
+                let rowItemValue = `row${i}ItemValue`;
+                let rowItemRefeName = `row${i}ItemRefeName`;
+                food.old[rowItemName] = rowItemName;
+                food.old[rowItemValue] = rowItemValue;
+                food.old[rowItemRefeName] = rowItemRefeName;
+                // console.log([rowItemName], [rowItemValue], [rowItemRefeName]);
+
+                window[rowItemName] = $(`#row${i} .item-name`).val();
+                window[rowItemValue] = Number($(`#row${i} .item-value`).val());
+                window[rowItemRefeName] = Number($(`#row${i} .item-refe-value`).val());
+                console.log([rowItemName], [rowItemValue], [rowItemRefeName]);
+
+
+
+
+                let calcRowItemName = `calcRow${i}Name`
+                let calcRowIteamValue = `calcRow${i}IteamValue`
+                let calcRowItemRefeName = `calcRow${i}ItemRefeName`
+                window[calcRowItemName] = window[rowItemName]
+                window[calcRowIteamValue] = window[rowItemValue]*zoom
+                window[calcRowItemRefeName] = window[rowItemRefeName]*zoom
+
+                $(`#row${i}-calc .item-name`).val(window[calcRowItemName]);
+                $(`#row${i}-calc .item-value`).val(window[calcRowIteamValue]);
+                $(`#row${i}-calc .item-refe-value`).val(window[calcRowItemRefeName]);
+
+
+
+                food.new[calcRowItemName] = calcRowItemName;
+                food.new[calcRowItemName] = calcRowItemName;
+                food.new[calcRowItemName] = calcRowItemName;
+
+
+
+            }
+
+            console.log(food);
+
+            // const row1ItemName = $('#row0 .item-name').val();
+            // const row1ItemValue = $('#row0 .item-value').val();
+            // const row1ItemRefeName = $('#row0 .item-value').val();
+
+            // const row1ItemName = $('#row1 .item-name').val();
+            // const row1ItemValue = $('#row1 .item-value').val();
+            // const row1ItemRefeName = $('#row1 .item-refe-value').val();
+
+            // const row2ItemName = $('#row2 .item-name').val();
+            // const row2ItemValue = $('#row2 .item-value').val();
+            // const row2ItemRefeName = $('#row2 .item-refe-value').val();
+
+            // const row3ItemName = $('#row3 .item-name').val();
+            // const row3ItemValue = $('#row3 .item-value').val();
+            // const row3ItemRefeName = $('#row3 .item-refe-value').val();
+
+
+
+
+            // const row0ItemNameCalc = row0ItemName
+            // const row0ItemValueCalc = Number(row0ItemValue) * Number(zoom)
+            // const row0ItemRefeNameCalc = Number(row0ItemRefeName) * Number(zoom)
+            // const row1ItemNameCalc = row1ItemName
+            // const row1ItemValueCalc = Number(row1ItemValue) * Number(zoom)
+            // const row1ItemRefeNameCalc = Number(row1ItemRefeName) * Number(zoom)
+            // const row2ItemNameCalc = row2ItemName
+            // const row2ItemValueCalc = Number(row2ItemValue) * Number(zoom)
+            // const row2ItemRefeNameCalc = Number(row2ItemRefeName) * Number(zoom)
+            // const row3ItemNameCalc = row3ItemName
+            // const row3ItemValueCalc = Number(row3ItemValue) * Number(zoom)
+            // const row3ItemRefeNameCalc = Number(row3ItemRefeName) * Number(zoom)
+
+
+            // $('#row1-calc .item-name').val(row1ItemNameCalc);
+            // $('#row1-calc .item-value').val(row1ItemValueCalc);
+            // $('#row1-calc .item-refe-value').val(row1ItemRefeNameCalc);
+            // $('#row2-calc .item-name').val(row2ItemNameCalc);
+            // $('#row2-calc .item-value').val(row2ItemValueCalc);
+            // $('#row2-calc .item-refe-value').val(row2ItemRefeNameCalc);
+            // $('#row3-calc .item-name').val(row3ItemNameCalc);
+            // $('#row3-calc .item-value').val(row3ItemValueCalc);
+            // $('#row3-calc .item-refe-value').val(row3ItemRefeNameCalc);
+
+
+            myFoods = [...myFoods, food]
+            localStorage.setItem('myFoods', JSON.stringify(myFoods))
+
+        }
+    }
+
+    $('body').keydown(calc)
+    $('#confirm').click(calc)
+    $('#zoom').change(function () {
+        let text = Number($(this).val())*100
+        $('#unit').text(text)
+        
+    })
+</script>
+
+</html>
